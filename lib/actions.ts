@@ -39,3 +39,9 @@ export async function markAsDone(id: number) {
   revalidatePath("/");
   revalidatePath("/done");
 }
+
+export async function deleteFlight(id: number) {
+  await db.delete(flights).where(eq(flights.id, id));
+  revalidatePath("/");
+  revalidatePath("/done");
+}

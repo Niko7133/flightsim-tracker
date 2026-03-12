@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { markAsDone } from "@/lib/actions";
+import { markAsDone, deleteFlight } from "@/lib/actions";
 import type { Flight } from "@/db/schema";
 import RouteMapPreviewWrapper from "./RouteMapPreviewWrapper";
 import type { RouteCoords } from "./FlightForm";
@@ -330,6 +330,15 @@ export default function FlightCard({ flight }: { flight: Flight }) {
                     ✓ Segna come fatto
                   </button>
                 )}
+                <button
+                  onClick={() => {
+                    deleteFlight(flight.id);
+                    setModalOpen(false);
+                  }}
+                  className="shrink-0 text-sm font-semibold text-white py-2.5 px-4 rounded-2xl border cursor-pointer bg-red-700/40 border-red-700 hover:bg-red-600 transition-colors"
+                >
+                  🗑
+                </button>
               </div>
             </div>
           </div>
