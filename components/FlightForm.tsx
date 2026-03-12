@@ -50,6 +50,21 @@ export default function FlightForm({ onSuccess, onRouteChange }: { onSuccess?: (
   const [arrInfo, setArrInfo] = useState<AirportInfo | null>(null);
   const [cruiseSpeed, setCruiseSpeed] = useState<number>(450);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [airline, setAirline] = useState<{ name: string; country: string } | null>(null);
+  const airlineTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function handleFlightNumberChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const val = e.target.value.toUpperCase();
+    setAirline(null);
+    if (airlineTimeoutRef.current) clearTimeout(airlineTimeoutRef.current);
+    if (val.length >= 3) {
+      airlineTimeoutRef.current = setTimeout(async () => {
+        const res = await fetch(`/api/airline?flight=${val}`);
+        const data = await res.json();
+        setAirline(data);
+      }, 600);
+    }
+  }
 
   function handleDepResolved(info: AirportInfo | null) {
     setDepInfo(info);
@@ -143,7 +158,12 @@ export default function FlightForm({ onSuccess, onRouteChange }: { onSuccess?: (
           </div>
           <div>
             <label className={labelClass}>Flight Number</label>
-            <input name="flightNumber" placeholder="AZ1234" className={`${inputClass} font-mono`} />
+            <input name="flightNumber" placeholder="AZ1234" onChange={handleFlightNumberChange} className={`${inputClass} font-mono`} />
+            {airline && (
+              <p className="text-xs text-white/40 mt-1 px-1">
+                ✈ <span className="text-white/70">{airline.name}</span> · {airline.country}
+              </p>
+            )}
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">

@@ -109,6 +109,7 @@ export default function FlightCard({ flight }: { flight: Flight }) {
   const [arrInfo, setArrInfo] = useState<AirportInfo | null>(null);
   const [loadingDep, setLoadingDep] = useState(false);
   const [loadingArr, setLoadingArr] = useState(false);
+  const [airline, setAirline] = useState<{ name: string; country: string } | null>(null);
 
   const route: RouteCoords =
     flight.departureLat && flight.departureLon && flight.arrivalLat && flight.arrivalLon
@@ -137,6 +138,11 @@ export default function FlightCard({ flight }: { flight: Flight }) {
       const data = await res.json();
       setArrInfo(data);
       setLoadingArr(false);
+    }
+    if (!airline && flight.flightNumber) {
+      const res = await fetch(`/api/airline?flight=${flight.flightNumber}`);
+      const data = await res.json();
+      setAirline(data);
     }
   }
 
@@ -176,6 +182,7 @@ export default function FlightCard({ flight }: { flight: Flight }) {
           </div>
           <div className="flex flex-row gap-3">
             <div className="w-1/2 rounded-xl border border-white/8 bg-white/3 px-4 py-3 flex flex-col gap-2">
+              {airline && <Row label="Compagnia" value={`${airline.name} · ${airline.country}`} valueClass="text-white/80" />}
               {flight.aircraft && <Row label="Tipo aereo" value={flight.aircraft} />}
               {flight.tailNumber && <Row label="Numero di coda" value={flight.tailNumber} valueClass="text-white/80 font-mono" onCopy={() => navigator.clipboard.writeText(flight.tailNumber!)} />}
               {flight.flightNumber && <Row label="Numero volo" value={flight.flightNumber} valueClass="text-blue-400 font-mono" onCopy={() => navigator.clipboard.writeText(flight.flightNumber!)} />}
@@ -296,6 +303,7 @@ export default function FlightCard({ flight }: { flight: Flight }) {
               <div className="space-y-2">
                 <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">Flight Details</p>
                 <div className="rounded-xl border border-white/8 bg-white/3 px-4 py-3 flex flex-col gap-2">
+                  {airline && <Row label="Compagnia" value={`${airline.name} · ${airline.country}`} valueClass="text-white/80" />}
                   {flight.aircraft && <Row label="Tipo aereo" value={flight.aircraft} />}
                   {flight.tailNumber && <Row label="Numero di coda" value={flight.tailNumber} valueClass="text-white/80 font-mono" onCopy={() => navigator.clipboard.writeText(flight.tailNumber!)} />}
                   {flight.flightNumber && (
