@@ -2,16 +2,16 @@
 
 import { useState, useRef } from "react";
 
-type AirportInfo = {
+export type AirportInfo = {
   icao: string;
   name: string;
   municipality: string;
   country: string;
   elevation: number;
+  localTime: string | null;
   lat: number;
   lon: number;
   weather?: { temperature_2m: number; weather_code: number };
-  timezone?: string;
 };
 
 const inputClass =

@@ -2,23 +2,12 @@
 
 import { useRef, useState } from "react";
 import { addFlight } from "@/lib/actions";
-import AirportInput from "./AirportInput";
+import AirportInput, { type AirportInfo } from "./AirportInput";
 import AircraftInput from "./AircraftInput";
 
 const inputClass =
   "flex w-full border px-3 py-1 text-sm bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20 rounded-xl h-11 focus:border-white/20 focus:outline-none focus:ring-0 transition-colors";
 const labelClass = "text-xs text-white/40 mb-1.5 block font-medium";
-
-type AirportInfo = {
-  name: string;
-  municipality: string;
-  country: string;
-  elevation: number;
-  localTime: string;
-  lat: number;
-  lon: number;
-  weather?: { temperature_2m: number; weather_code: number };
-};
 
 export type RouteCoords = {
   depLat: number;
