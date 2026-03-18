@@ -6,8 +6,8 @@ import AirportInput, { type AirportInfo } from "./AirportInput";
 import AircraftInput from "./AircraftInput";
 
 const inputClass =
-  "flex w-full border px-3 py-1 text-sm bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20 rounded-xl h-11 focus:border-white/20 focus:outline-none focus:ring-0 transition-colors";
-const labelClass = "text-xs text-white/40 mb-1.5 block font-medium";
+  "flex h-9 w-full border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm rounded-xl";
+const labelClass = "text-xs text-muted-foreground mb-1.5 block font-medium";
 
 export type RouteCoords = {
   depLat: number;
@@ -182,13 +182,22 @@ export default function FlightForm({ onSuccess, onRouteChange }: { onSuccess?: (
         </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full py-3 rounded-2xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 active:scale-[0.98] transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
-      >
-        {isSubmitting ? "Saving..." : "Add to Logbook"}
-      </button>
+      <div className="flex gap-3 pt-2">
+        <button
+          type="button"
+          onClick={onSuccess}
+          className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 flex-1"
+        >
+          Annulla
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2 flex-1"
+        >
+          {isSubmitting ? "Saving..." : "Crea volo"}
+        </button>
+      </div>
     </form>
   );
 }

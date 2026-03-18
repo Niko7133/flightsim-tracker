@@ -11,7 +11,7 @@ type Aircraft = {
 };
 
 const inputClass =
-  "flex w-full border px-3 py-1 text-sm bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20 rounded-xl h-11 focus:border-white/20 focus:outline-none focus:ring-0 transition-colors";
+  "flex h-9 w-full border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm rounded-xl";
 
 export default function AircraftInput({ onSpeedChange }: { onSpeedChange?: (speed: number) => void }) {
   const [value, setValue] = useState("");

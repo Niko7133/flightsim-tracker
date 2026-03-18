@@ -8,7 +8,7 @@ export default async function DonePage() {
   const done = await db.select().from(flights).where(eq(flights.done, true));
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-white p-6 w-full mx-auto">
+    <main className="min-h-screen bg-background text-white p-6 w-full mx-auto">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold">✅ Voli completati</h1>
         <Link href="/" className="text-sm text-zinc-400 hover:text-white transition-colors">

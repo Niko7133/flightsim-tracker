@@ -87,7 +87,7 @@ function AirportCard({ icao, info, loading }: { icao: string; info: AirportInfo 
           )}
         </span>
       </button>
-      <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 flex flex-col gap-2">
+      <div className="rounded-xl border bg-background border-input px-3 py-3  shadow-sm flex flex-col gap-2">
         {loading && <p className="text-xs text-white/30">Caricamento...</p>}
         {info && (
           <>
@@ -95,7 +95,7 @@ function AirportCard({ icao, info, loading }: { icao: string; info: AirportInfo 
             <Row label="Stato" value={info.country} />
             <Row label="Altitudine" value={info.elevation ? `${Math.round(info.elevation)} ft` : "—"} />
             <Row label="Orario locale" value={info.localTime ?? "—"} />
-            {info.weather && <Row label="Temperatura" value={`${info.weather.temperature_2m}°C`} valueClass="text-blue-400" />}
+            {info.weather && <Row label="Temperatura" value={`${info.weather.temperature_2m}°C`} className="text-blue-400" />}
           </>
         )}
       </div>
@@ -153,10 +153,165 @@ export default function FlightCard({ flight }: { flight: Flight }) {
   return (
     <>
       {/* Card */}
-      <div onClick={openModal} className="bg-nero border border-zinc-800 rounded-xl p-5 flex justify-between items-start gap-4 cursor-pointer hover:border-zinc-600 transition-colors">
-        <div className="flex flex-col gap-3 w-12/12">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ backgroundColor: "rgba(59, 130, 246, 0.15)" }}>
+      <div className="group relative bg-card rounded-2xl border overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 opacity-70 border-border/60">
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary/40"></div>
+        <div className="p-5">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
+                <span className="font-bold text-lg tracking-wide text-foreground">{flight.departure}</span>
+                <div className="flex items-center gap-1 text-primary">
+                  <div className="h-px w-8 bg-primary/40"></div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    className="lucide lucide-plane w-3.5 h-3.5 rotate-0"
+                  >
+                    <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"></path>
+                  </svg>
+                  <div className="h-px w-8 bg-primary/40"></div>
+                </div>
+                <span className="font-bold text-lg tracking-wide text-foreground">{flight.arrival}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={openModal}
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent  h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                id="openModalFlight"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  className="lucide lucide-pencil w-3.5 h-3.5"
+                >
+                  <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path>
+                  <path d="m15 5 4 4"></path>
+                </svg>
+              </button>
+              <button
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                onClick={() => deleteFlight(flight.id)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  className="lucide lucide-trash2 w-3.5 h-3.5"
+                >
+                  <path d="M3 6h18"></path>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                  <line x1="10" x2="10" y1="11" y2="17"></line>
+                  <line x1="14" x2="14" y1="11" y2="17"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            <div className="bg-muted/60 rounded-lg px-3 py-2">
+              <div className="text-xs text-muted-foreground mb-0.5">Aereo</div>
+              <div className="text-sm font-medium text-foreground truncate">{flight.aircraft}</div>
+            </div>
+            <div className="bg-muted/60 rounded-lg px-3 py-2">
+              <div className="text-xs text-muted-foreground mb-0.5">Coda</div>
+              <div className="text-sm font-medium text-foreground truncate">{flight.tailNumber}</div>
+            </div>
+            {airline && (
+              <div className="bg-muted/60 rounded-lg px-3 py-2">
+                <div className="text-xs text-muted-foreground mb-0.5">Compagnia</div>
+                <div className="text-sm font-medium text-foreground truncate">{airline.name}</div>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-3 mb-3 px-1">
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                className="lucide lucide-ruler w-3 h-3 text-primary/70"
+              >
+                <path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"></path>
+                <path d="m14.5 12.5 2-2"></path>
+                <path d="m11.5 9.5 2-2"></path>
+                <path d="m8.5 6.5 2-2"></path>
+                <path d="m17.5 15.5 2-2"></path>
+              </svg>
+              {flightStats?.dist}nm
+            </span>
+            <span className="text-muted-foreground/30 text-xs">·</span>
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                className="lucide lucide-clock w-3 h-3 text-primary/70"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              {flightStats?.duration}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap mb-4">
+            <a href="https://www.flightradar24.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                className="lucide lucide-external-link w-3 h-3"
+              >
+                <path d="M15 3h6v6"></path>
+                <path d="M10 14 21 3"></path>
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              </svg>
+              FlightRadar
+            </a>
+          </div>
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => markAsDone(flight.id)}
+              className="flex items-center gap-2 text-sm font-medium transition-all px-3 py-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -167,71 +322,33 @@ export default function FlightCard({ flight }: { flight: Flight }) {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="w-5 h-5"
-                style={{ color: "rgb(59, 130, 246)" }}
+                className="lucide lucide-circle w-4 h-4"
               >
-                <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" />
+                <circle cx="12" cy="12" r="10" />
               </svg>
+              {flight.done ? "Completato" : "Da fare"}
+            </button>
+            <div className="inline-flex items-center rounded-md border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 text-xs">
+              Pianificato
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-white">
-                {flight.departure} - {flight.arrival}
-              </h2>
-              {/* <p className="text-xs text-white/40">Plan your next route</p> */}
-            </div>
-          </div>
-          <div className="flex flex-row gap-3">
-            <div className="w-1/2 rounded-xl border border-white/8 bg-white/3 px-4 py-3 flex flex-col gap-2">
-              {airline && <Row label="Compagnia" value={`${airline.name} · ${airline.country}`} valueClass="text-white/80" />}
-              {flight.aircraft && <Row label="Tipo aereo" value={flight.aircraft} />}
-              {flight.tailNumber && <Row label="Numero di coda" value={flight.tailNumber} valueClass="text-white/80 font-mono" onCopy={() => navigator.clipboard.writeText(flight.tailNumber!)} />}
-              {flight.flightNumber && <Row label="Numero volo" value={flight.flightNumber} valueClass="text-blue-400 font-mono" onCopy={() => navigator.clipboard.writeText(flight.flightNumber!)} />}
-              {flight.notes && <Row label="Note" value={flight.notes} />}
-            </div>
-            {flightStats && (
-              <div className="w-1/2 rounded-xl border border-white/8 bg-white/3 px-4 py-3 flex justify-between items-center text-xs">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-white/40">Distanza</span>
-                  <span className="text-white font-medium">{flightStats.dist} NM</span>
-                </div>
-                <div className="w-px h-8 bg-white/8" />
-                <div className="flex flex-col gap-0.5 items-end">
-                  <span className="text-white/40">Tempo stimato</span>
-                  <span className="text-blue-400 font-semibold">{flightStats.duration}</span>
-                </div>
-              </div>
-            )}
           </div>
         </div>
-        {!flight.done ? (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              markAsDone(flight.id);
-            }}
-            className="shrink-0 text-sm bg-zinc-800 hover:bg-green-700 text-zinc-300 hover:text-white px-3 py-1.5 rounded-lg transition-colors"
-          >
-            ✓ Fatto
-          </button>
-        ) : (
-          <span className="shrink-0 text-sm text-green-500 font-medium">✓ Completato</span>
-        )}
       </div>
 
       {/* Modal */}
       <div
-        className={`fixed inset-0 z-1000 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-200 ${
+        className={`fixed inset-0 z-1000 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 transition-opacity duration-200 ${
           modalOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
         onClick={(e) => {
           if (e.target === e.currentTarget) setModalOpen(false);
         }}
       >
-        <div className="flex w-10/12 max-h-[90vh] rounded-3xl border border-white/8 bg-[#1A1A24] shadow-2xl overflow-hidden">
+        <div className="flex min-w-5/12 w-fit max-h-[90vh] rounded-2xl border border-white/8 bg-background shadow-2xl overflow-hidden">
           {/* Sinistra — dettagli */}
-          <div className="w-7/12 shrink-0 flex flex-col overflow-y-auto">
+          <div className="w-full shrink-0 flex flex-col overflow-y-auto">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 pb-4 sticky top-0 bg-[#1A1A24] z-10">
+            <div className="flex items-center justify-between p-6 pb-4 sticky top-0 z-10">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ backgroundColor: "rgba(59, 130, 246, 0.15)" }}>
                   <svg
@@ -286,7 +403,7 @@ export default function FlightCard({ flight }: { flight: Flight }) {
 
               {/* Stima */}
               {flightStats && (
-                <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 flex justify-between items-center text-xs">
+                <div className="rounded-xl border bg-background border-input px-3 py-3  shadow-sm flex justify-between items-center text-xs">
                   <div className="flex flex-col gap-0.5">
                     <span className="text-white/40">Distanza</span>
                     <span className="text-white font-medium">{flightStats.dist} NM</span>
@@ -302,12 +419,12 @@ export default function FlightCard({ flight }: { flight: Flight }) {
               {/* Flight details */}
               <div className="space-y-2">
                 <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">Flight Details</p>
-                <div className="rounded-xl border border-white/8 bg-white/3 px-4 py-3 flex flex-col gap-2">
-                  {airline && <Row label="Compagnia" value={`${airline.name} · ${airline.country}`} valueClass="text-white/80" />}
+                <div className="rounded-xl border bg-background border-input px-3 py-3 flex flex-col gap-2 shadow-sm">
+                  {airline && <Row label="Compagnia" value={`${airline.name} · ${airline.country}`} className="text-white/80" />}
                   {flight.aircraft && <Row label="Tipo aereo" value={flight.aircraft} />}
-                  {flight.tailNumber && <Row label="Numero di coda" value={flight.tailNumber} valueClass="text-white/80 font-mono" onCopy={() => navigator.clipboard.writeText(flight.tailNumber!)} />}
+                  {flight.tailNumber && <Row label="Numero di coda" value={flight.tailNumber} className="text-white/80 font-mono" onCopy={() => navigator.clipboard.writeText(flight.tailNumber!)} />}
                   {flight.flightNumber && (
-                    <Row label="Numero volo" value={flight.flightNumber} valueClass="text-blue-400 font-mono" onCopy={() => navigator.clipboard.writeText(flight.flightNumber!)} />
+                    <Row label="Numero volo" value={flight.flightNumber} className="text-blue-400 font-mono" onCopy={() => navigator.clipboard.writeText(flight.flightNumber!)} />
                   )}
                   {flight.notes && <Row label="Note" value={flight.notes} />}
                   <Row label="Stato" value={flight.done ? "✓ Completato" : "⏳ Da fare"} valueClass={flight.done ? "text-green-500" : "text-yellow-500"} />
@@ -316,44 +433,24 @@ export default function FlightCard({ flight }: { flight: Flight }) {
               </div>
 
               {/* Azioni */}
-              <div className="flex flex-row gap-3">
-                {flight.flightradarUrl && (
-                  <a
-                    href={flight.flightradarUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full text-center text-sm font-semibold text-white py-2.5 rounded-2xl bg-orange-600/40 hover:bg-orange-500 transition-colors border border-orange-600"
-                  >
-                    🔍 Apri su Flightradar24
-                  </a>
-                )}
-                {!flight.done && (
-                  <button
-                    onClick={() => {
-                      markAsDone(flight.id);
-                      setModalOpen(false);
-                    }}
-                    className="w-full text-sm font-semibold text-white py-2.5 rounded-2xl border cursor-pointer bg-green-700/40 border-green-700 hover:bg-green-600 transition-colors"
-                  >
-                    ✓ Segna come fatto
-                  </button>
-                )}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setModalOpen(false)}
+                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent h-9 px-4 py-2 flex-1"
+                >
+                  Annulla
+                </button>
                 <button
                   onClick={() => {
-                    deleteFlight(flight.id);
+                    // TODO: updateFlight(flight.id, formData)
                     setModalOpen(false);
                   }}
-                  className="shrink-0 text-sm font-semibold text-white py-2.5 px-4 rounded-2xl border cursor-pointer bg-red-700/40 border-red-700 hover:bg-red-600 transition-colors"
+                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2 flex-1"
                 >
-                  🗑
+                  Aggiorna
                 </button>
               </div>
             </div>
-          </div>
-
-          {/* Destra — mappa */}
-          <div className="flex-1 border-l border-white/[0.06]">
-            <RouteMapPreviewWrapper route={route} />
           </div>
         </div>
       </div>

@@ -1,34 +1,36 @@
 import { db } from "@/db";
 import { flights } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import FlightMapAllWrapper from "@/components/FlightMapAllWrapper";
-import FlightListSearch from "@/components/FlightListSearch";
-import Link from "next/link";
+import HomeHeader from "@/components/HomeHeader";
 
 export default async function Home() {
-  const pending = await db.select().from(flights).where(eq(flights.done, false));
+  const allFlights = await db.select().from(flights);
 
   return (
-    <div className="flex h-screen bg-zinc-950 text-white overflow-hidden">
-      {/* Sidebar sinistra */}
-      <div className="w-2/4 shrink-0 flex flex-col h-full border-r border-zinc-800">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
-          <h1 className="text-lg font-bold">✈️ Flight Sim Tracker</h1>
-          <Link href="/done" className="text-xs text-zinc-400 hover:text-white transition-colors">
-            Completati →
-          </Link>
+    <main>
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/60">
+        <div className="mx-auto px-body h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-primary-foreground"
+              >
+                <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" />
+              </svg>
+            </div>
+            <span className="font-semibold text-sm tracking-tight">SimFlights</span>
+          </div>
         </div>
-        <div className="flex-1 overflow-y-auto px-6 py-4">
-          <FlightListSearch flights={pending} />
-        </div>
-      </div>
-
-      {/* Mappa destra */}
-      <div className="w-2/4 flex-1 h-full px-6 py-4">
-        <div className="rounded-3xl overflow-hidden w-full h-full border border-zinc-800">
-          <FlightMapAllWrapper flights={pending} />
-        </div>
-      </div>
-    </div>
+      </header>
+      <HomeHeader flights={allFlights} />
+    </main>
   );
 }
