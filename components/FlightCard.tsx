@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { markAsDone, deleteFlight } from "@/lib/actions";
 import type { Flight } from "@/db/schema";
-import RouteMapPreviewWrapper from "./RouteMapPreviewWrapper";
 import type { RouteCoords } from "./FlightForm";
+import FlightModal from "./modal/FlightModal";
+import ConfirmDialog from "./ui/ConfirmDialog";
 
 type AirportInfo = {
   name: string;
@@ -61,55 +62,13 @@ function Row({ label, value, valueClass, onCopy }: { label: string; value: React
   );
 }
 
-function AirportCard({ icao, info, loading }: { icao: string; info: AirportInfo | null; loading: boolean }) {
-  const [copied, setCopied] = useState(false);
-
-  async function handleCopy() {
-    await navigator.clipboard.writeText(icao);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  }
-
-  return (
-    <div className="space-y-2">
-      <button onClick={handleCopy} className="flex items-center gap-1.5 group">
-        <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">{icao}</p>
-        <span className="text-white/20 group-hover:text-white/60 transition-colors">
-          {copied ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 6 9 17l-5-5" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-              <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-            </svg>
-          )}
-        </span>
-      </button>
-      <div className="rounded-xl border bg-background border-input px-3 py-3  shadow-sm flex flex-col gap-2">
-        {loading && <p className="text-xs text-white/30">Caricamento...</p>}
-        {info && (
-          <>
-            <div className="text-white text-xs font-medium">{info.name}</div>
-            <Row label="Stato" value={info.country} />
-            <Row label="Altitudine" value={info.elevation ? `${Math.round(info.elevation)} ft` : "—"} />
-            <Row label="Orario locale" value={info.localTime ?? "—"} />
-            {info.weather && <Row label="Temperatura" value={`${info.weather.temperature_2m}°C`} className="text-blue-400" />}
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export default function FlightCard({ flight }: { flight: Flight }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [depInfo, setDepInfo] = useState<AirportInfo | null>(null);
   const [arrInfo, setArrInfo] = useState<AirportInfo | null>(null);
   const [loadingDep, setLoadingDep] = useState(false);
   const [loadingArr, setLoadingArr] = useState(false);
-  const [airline, setAirline] = useState<{ name: string; country: string } | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const route: RouteCoords =
     flight.departureLat && flight.departureLon && flight.arrivalLat && flight.arrivalLon
@@ -139,11 +98,6 @@ export default function FlightCard({ flight }: { flight: Flight }) {
       setArrInfo(data);
       setLoadingArr(false);
     }
-    if (!airline && flight.flightNumber) {
-      const res = await fetch(`/api/airline?flight=${flight.flightNumber}`);
-      const data = await res.json();
-      setAirline(data);
-    }
   }
 
   async function copyToClipboard(text: string) {
@@ -169,9 +123,9 @@ export default function FlightCard({ flight }: { flight: Flight }) {
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                     className="lucide lucide-plane w-3.5 h-3.5 rotate-0"
                   >
                     <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"></path>
@@ -184,7 +138,7 @@ export default function FlightCard({ flight }: { flight: Flight }) {
             <div className="flex items-center gap-1">
               <button
                 onClick={openModal}
-                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent  h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer disabled:pointer-events-none disabled:opacity-50 hover:bg-accent  h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
                 id="openModalFlight"
               >
                 <svg
@@ -194,9 +148,9 @@ export default function FlightCard({ flight }: { flight: Flight }) {
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   className="lucide lucide-pencil w-3.5 h-3.5"
                 >
                   <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path>
@@ -204,8 +158,8 @@ export default function FlightCard({ flight }: { flight: Flight }) {
                 </svg>
               </button>
               <button
-                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
-                onClick={() => deleteFlight(flight.id)}
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent h-7 w-7 opacity-0  cursor-pointer group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                onClick={() => setConfirmOpen(true)}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -214,9 +168,9 @@ export default function FlightCard({ flight }: { flight: Flight }) {
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   className="lucide lucide-trash2 w-3.5 h-3.5"
                 >
                   <path d="M3 6h18"></path>
@@ -237,223 +191,89 @@ export default function FlightCard({ flight }: { flight: Flight }) {
               <div className="text-xs text-muted-foreground mb-0.5">Coda</div>
               <div className="text-sm font-medium text-foreground truncate">{flight.tailNumber}</div>
             </div>
-            {airline && (
-              <div className="bg-muted/60 rounded-lg px-3 py-2">
-                <div className="text-xs text-muted-foreground mb-0.5">Compagnia</div>
-                <div className="text-sm font-medium text-foreground truncate">{airline.name}</div>
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-3 mb-3 px-1">
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                className="lucide lucide-ruler w-3 h-3 text-primary/70"
-              >
-                <path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"></path>
-                <path d="m14.5 12.5 2-2"></path>
-                <path d="m11.5 9.5 2-2"></path>
-                <path d="m8.5 6.5 2-2"></path>
-                <path d="m17.5 15.5 2-2"></path>
-              </svg>
-              {flightStats?.dist}nm
-            </span>
-            <span className="text-muted-foreground/30 text-xs">·</span>
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                className="lucide lucide-clock w-3 h-3 text-primary/70"
-              >
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-              {flightStats?.duration}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap mb-4">
-            <a href="https://www.flightradar24.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                className="lucide lucide-external-link w-3 h-3"
-              >
-                <path d="M15 3h6v6"></path>
-                <path d="M10 14 21 3"></path>
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-              </svg>
-              FlightRadar
-            </a>
-          </div>
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => markAsDone(flight.id)}
-              className="flex items-center gap-2 text-sm font-medium transition-all px-3 py-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="lucide lucide-circle w-4 h-4"
-              >
-                <circle cx="12" cy="12" r="10" />
-              </svg>
-              {flight.done ? "Completato" : "Da fare"}
-            </button>
-            <div className="inline-flex items-center rounded-md border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 text-xs">
-              Pianificato
+
+            <div className="bg-muted/60 rounded-lg px-3 py-2">
+              <div className="text-xs text-muted-foreground mb-0.5">Distanza</div>
+              <div className="text-sm font-medium text-foreground truncate">{flightStats?.dist}nm</div>
+            </div>
+            <div className="bg-muted/60 rounded-lg px-3 py-2">
+              <div className="text-xs text-muted-foreground mb-0.5">Tempo stimato</div>
+              <div className="text-sm font-medium text-foreground truncate">{flightStats?.duration}</div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Modal */}
-      <div
-        className={`fixed inset-0 z-1000 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 transition-opacity duration-200 ${
-          modalOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) setModalOpen(false);
-        }}
-      >
-        <div className="flex min-w-5/12 w-fit max-h-[90vh] rounded-2xl border border-white/8 bg-background shadow-2xl overflow-hidden">
-          {/* Sinistra — dettagli */}
-          <div className="w-full shrink-0 flex flex-col overflow-y-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 pb-4 sticky top-0 z-10">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ backgroundColor: "rgba(59, 130, 246, 0.15)" }}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    style={{ color: "rgb(59, 130, 246)" }}
-                  >
-                    <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" />
-                  </svg>
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-white">
-                    {flight.departure} → {flight.arrival}
-                  </h2>
-                  <p className="text-xs text-white/40">
-                    {flight.flightNumber ?? "Volo privato"} · {new Date(flight.createdAt).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" })}
-                  </p>
-                </div>
-              </div>
-              <button onClick={() => setModalOpen(false)} className="w-8 h-8 rounded-xl flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.1] transition-colors">
+          {flight.flightradarUrl && (
+            <div className="flex items-center gap-2 flex-wrap mb-4">
+              <a href={flight.flightradarUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
+                  width="24"
+                  height="24"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="text-white/50"
+                  className="lucide lucide-external-link w-3 h-3"
                 >
-                  <path d="M18 6 6 18" />
-                  <path d="m6 6 12 12" />
+                  <path d="M15 3h6v6"></path>
+                  <path d="M10 14 21 3"></path>
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                 </svg>
-              </button>
+                FlightRadar
+              </a>
             </div>
-
-            <div className="px-6 pb-6 flex flex-col gap-5">
-              {/* Aeroporti */}
-              <div className="grid grid-cols-2 gap-3">
-                <AirportCard icao={flight.departure} info={depInfo} loading={loadingDep} />
-                <AirportCard icao={flight.arrival} info={arrInfo} loading={loadingArr} />
-              </div>
-
-              {/* Stima */}
-              {flightStats && (
-                <div className="rounded-xl border bg-background border-input px-3 py-3  shadow-sm flex justify-between items-center text-xs">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-white/40">Distanza</span>
-                    <span className="text-white font-medium">{flightStats.dist} NM</span>
-                  </div>
-                  <div className="w-px h-8 bg-white/[0.08]" />
-                  <div className="flex flex-col gap-0.5 items-end">
-                    <span className="text-white/40">Tempo stimato</span>
-                    <span className="text-blue-400 font-semibold">{flightStats.duration}</span>
-                  </div>
-                </div>
+          )}
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => markAsDone(flight.id, !flight.done)}
+              className="flex items-center cursor-pointer gap-2 text-sm font-medium transition-all px-3 py-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5"
+            >
+              {flight.done ? (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-green-500"
+                  >
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <path d="M22 4 12 14.01l-3-3" />
+                  </svg>
+                  <span className="text-green-500">Completato</span>
+                </>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                  </svg>
+                  Da fare
+                </>
               )}
-
-              {/* Flight details */}
-              <div className="space-y-2">
-                <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">Flight Details</p>
-                <div className="rounded-xl border bg-background border-input px-3 py-3 flex flex-col gap-2 shadow-sm">
-                  {airline && <Row label="Compagnia" value={`${airline.name} · ${airline.country}`} className="text-white/80" />}
-                  {flight.aircraft && <Row label="Tipo aereo" value={flight.aircraft} />}
-                  {flight.tailNumber && <Row label="Numero di coda" value={flight.tailNumber} className="text-white/80 font-mono" onCopy={() => navigator.clipboard.writeText(flight.tailNumber!)} />}
-                  {flight.flightNumber && (
-                    <Row label="Numero volo" value={flight.flightNumber} className="text-blue-400 font-mono" onCopy={() => navigator.clipboard.writeText(flight.flightNumber!)} />
-                  )}
-                  {flight.notes && <Row label="Note" value={flight.notes} />}
-                  <Row label="Stato" value={flight.done ? "✓ Completato" : "⏳ Da fare"} valueClass={flight.done ? "text-green-500" : "text-yellow-500"} />
-                  <Row label="Aggiunto il" value={new Date(flight.createdAt).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" })} />
-                </div>
-              </div>
-
-              {/* Azioni */}
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => setModalOpen(false)}
-                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent h-9 px-4 py-2 flex-1"
-                >
-                  Annulla
-                </button>
-                <button
-                  onClick={() => {
-                    // TODO: updateFlight(flight.id, formData)
-                    setModalOpen(false);
-                  }}
-                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2 flex-1"
-                >
-                  Aggiorna
-                </button>
-              </div>
-            </div>
+            </button>
           </div>
         </div>
       </div>
+
+      <FlightModal open={modalOpen} onClose={() => setModalOpen(false)} flight={flight} />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Elimina volo"
+        description={`Vuoi eliminare il volo ${flight.departure} → ${flight.arrival}?`}
+        confirmLabel="Elimina"
+        onConfirm={() => {
+          deleteFlight(flight.id);
+          setConfirmOpen(false);
+        }}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </>
   );
 }

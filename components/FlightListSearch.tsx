@@ -6,6 +6,7 @@ import FlightForm from "./FlightForm";
 import RouteMapPreviewWrapper from "./RouteMapPreviewWrapper";
 import type { RouteCoords } from "./FlightForm";
 import type { Flight } from "@/db/schema";
+import FlightModal from "./modal/FlightModal";
 
 type TabFilter = "all" | "pending" | "done";
 
@@ -95,41 +96,7 @@ export default function FlightListSearch({ flights, externalModalOpen, onExterna
         </div>
       </div>
 
-      {/* Modal nuovo volo */}
-      <div
-        className={`fixed inset-0 z-1000 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 transition-opacity duration-200 ${
-          modalOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) closeModal();
-        }}
-      >
-        <div className="flex flex-col min-w-5/12 w-fit max-h-[90vh] rounded-2xl border border-white/8 bg-background shadow-2xl overflow-hidden p-6 gap-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white">Nuovo volo</h2>
-            <button onClick={closeModal} className="w-8 h-8 rounded-xl flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.1] transition-colors">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-white/50"
-              >
-                <path d="M18 6 6 18" />
-                <path d="m6 6 12 12" />
-              </svg>
-            </button>
-          </div>
-          <div className="">
-            <FlightForm onSuccess={closeModal} onRouteChange={setRoute} />
-          </div>
-        </div>
-      </div>
+      <FlightModal open={modalOpen} onClose={closeModal} onRouteChange={setRoute} />
     </>
   );
 }

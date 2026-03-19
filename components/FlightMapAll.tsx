@@ -32,7 +32,7 @@ export default function FlightMapAll({ flights }: { flights: Flight[] }) {
 
   return (
     <div className="relative h-full w-full">
-      <Map center={[10, 20]} zoom={2} className="h-full w-full">
+      <Map center={[10, 20]} zoom={2} className="h-full w-full" theme="dark">
         {withCoords.map((f) => (
           <Fragment key={f.id}>
             <MapMarker longitude={f.departureLon!} latitude={f.departureLat!}>
@@ -45,9 +45,9 @@ export default function FlightMapAll({ flights }: { flights: Flight[] }) {
             </MapMarker>
             <MapRoute
               coordinates={getCurvedCoordinates(f.departureLon!, f.departureLat!, f.arrivalLon!, f.arrivalLat!)}
-              color={f.done ? "7c3bed" : "#7c3bed"}
-              width={f.done ? 1.5 : 2}
-              opacity={f.done ? 0.5 : 0.9}
+              color={f.done ? "#7c3bed" : "#7c3bed"}
+              width={f.done ? 2 : 2}
+              opacity={f.done ? 0.9 : 0.9}
               dashArray={f.done ? [6, 6] : undefined}
             />
           </Fragment>
@@ -58,13 +58,13 @@ export default function FlightMapAll({ flights }: { flights: Flight[] }) {
       <div className="absolute bottom-4 left-4 z-10 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 flex flex-col gap-2 text-xs text-white">
         <div className="flex items-center gap-2">
           <svg width="32" height="8">
-            <line x1="0" y1="4" x2="32" y2="4" stroke="#3b82f6" strokeWidth="2" />
+            <line x1="0" y1="4" x2="32" y2="4" stroke="#7c3bed" strokeWidth="2" />
           </svg>
           <span className="text-white/70">Da fare ({pending.length})</span>
         </div>
         <div className="flex items-center gap-2">
           <svg width="32" height="8">
-            <line x1="0" y1="4" x2="32" y2="4" stroke="#6b7280" strokeWidth="1.5" strokeDasharray="4 4" />
+            <line x1="0" y1="4" x2="32" y2="4" stroke="#7c3bed" strokeWidth="1.5" strokeDasharray="4 4" />
           </svg>
           <span className="text-white/70">Completati ({done.length})</span>
         </div>

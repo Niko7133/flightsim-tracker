@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export type AirportInfo = {
   icao: string;
@@ -17,11 +17,15 @@ export type AirportInfo = {
 const inputClass =
   "flex h-9 w-full border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm rounded-xl";
 
-export default function AirportInput({ name, onResolved }: { name: string; onResolved?: (info: AirportInfo | null) => void }) {
-  const [value, setValue] = useState("");
+export default function AirportInput({ name, onResolved, defaultValue }: { name: string; onResolved?: (info: AirportInfo | null) => void; defaultValue?: string }) {
+  const [value, setValue] = useState(defaultValue ?? "");
   const [info, setInfo] = useState<AirportInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (defaultValue) fetchAirport(defaultValue);
+  }, [defaultValue]);
 
   async function fetchAirport(code: string) {
     if (code.length < 3) {

@@ -13,8 +13,8 @@ type Aircraft = {
 const inputClass =
   "flex h-9 w-full border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm rounded-xl";
 
-export default function AircraftInput({ onSpeedChange }: { onSpeedChange?: (speed: number) => void }) {
-  const [value, setValue] = useState("");
+export default function AircraftInput({ onSpeedChange, defaultValue }: { onSpeedChange?: (speed: number) => void; defaultValue?: string }) {
+  const [value, setValue] = useState(defaultValue ?? "");
   const [results, setResults] = useState<Aircraft[]>([]);
   const [selected, setSelected] = useState<Aircraft | null>(null);
   const [loading, setLoading] = useState(false);
@@ -53,7 +53,6 @@ export default function AircraftInput({ onSpeedChange }: { onSpeedChange?: (spee
   return (
     <div className="flex flex-col gap-1 relative">
       <input name="aircraft" value={value} onChange={handleChange} placeholder="Boeing 737-800" autoComplete="off" className={inputClass} />
-
       {(loading || results.length > 0) && (
         <div className="absolute top-full left-0 right-0 z-20 bg-zinc-800 border border-zinc-700 rounded-lg mt-1 overflow-hidden shadow-xl">
           {loading && <p className="text-xs text-zinc-500 px-4 py-2">Ricerca...</p>}
