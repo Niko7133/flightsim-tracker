@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import FlightCard from "./FlightCard";
-import RouteMapPreviewWrapper from "./RouteMapPreviewWrapper";
 import type { Flight } from "@/db/schema";
 import FlightModal from "./modal/FlightModal";
 import type { RouteCoords } from "./modal/FlightModal";
@@ -14,7 +13,6 @@ export default function FlightListSearch({ flights, externalModalOpen, onExterna
   const [modalOpen, setModalOpen] = useState(false);
   const [grid, setGrid] = useState(false);
   const [tab, setTab] = useState<TabFilter>("all");
-  const [route, setRoute] = useState<RouteCoords>(null);
 
   useEffect(() => {
     if (externalModalOpen) setModalOpen(true);
@@ -91,7 +89,7 @@ export default function FlightListSearch({ flights, externalModalOpen, onExterna
         </div>
       </div>
 
-      <FlightModal open={modalOpen} onClose={closeModal} onRouteChange={setRoute} />
+      <FlightModal open={modalOpen} onClose={closeModal} />
     </>
   );
 }
