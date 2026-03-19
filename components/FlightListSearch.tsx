@@ -5,15 +5,16 @@ import FlightCard from "./FlightCard";
 import RouteMapPreviewWrapper from "./RouteMapPreviewWrapper";
 import type { Flight } from "@/db/schema";
 import FlightModal from "./modal/FlightModal";
+import type { RouteCoords } from "./modal/FlightModal";
 
 type TabFilter = "all" | "pending" | "done";
 
 export default function FlightListSearch({ flights, externalModalOpen, onExternalModalClose }: { flights: Flight[]; externalModalOpen?: boolean; onExternalModalClose?: () => void }) {
-  const [route, setRoute] = useState(null);
   const [query, setQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [grid, setGrid] = useState(false);
   const [tab, setTab] = useState<TabFilter>("all");
+  const [route, setRoute] = useState<RouteCoords>(null);
 
   useEffect(() => {
     if (externalModalOpen) setModalOpen(true);
