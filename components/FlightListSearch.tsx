@@ -2,16 +2,14 @@
 
 import { useState, useEffect } from "react";
 import FlightCard from "./FlightCard";
-import FlightForm from "./FlightForm";
 import RouteMapPreviewWrapper from "./RouteMapPreviewWrapper";
-import type { RouteCoords } from "./FlightForm";
 import type { Flight } from "@/db/schema";
 import FlightModal from "./modal/FlightModal";
 
 type TabFilter = "all" | "pending" | "done";
 
 export default function FlightListSearch({ flights, externalModalOpen, onExternalModalClose }: { flights: Flight[]; externalModalOpen?: boolean; onExternalModalClose?: () => void }) {
-  const [route, setRoute] = useState<RouteCoords>(null);
+  const [route, setRoute] = useState(null);
   const [query, setQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [grid, setGrid] = useState(false);
@@ -29,9 +27,7 @@ export default function FlightListSearch({ flights, externalModalOpen, onExterna
   const filtered = flights.filter((f) => {
     const q = query.toLowerCase();
     const matchesQuery = f.departure.toLowerCase().includes(q) || f.arrival.toLowerCase().includes(q) || f.aircraft?.toLowerCase().includes(q);
-
     const matchesTab = tab === "all" || (tab === "pending" && !f.done) || (tab === "done" && f.done);
-
     return matchesQuery && matchesTab;
   });
 
@@ -43,7 +39,6 @@ export default function FlightListSearch({ flights, externalModalOpen, onExterna
   return (
     <>
       <div className="flex-1 min-w-0 flex flex-col gap-4">
-        {/* Search + Tabs */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <svg
@@ -82,7 +77,6 @@ export default function FlightListSearch({ flights, externalModalOpen, onExterna
           </div>
         </div>
 
-        {/* Contatore */}
         <p className="text-sm text-zinc-500 uppercase tracking-wider font-medium">
           {tab === "all" ? "Tutti" : tab === "pending" ? "Da fare" : "Completati"} · {filtered.length}
         </p>
