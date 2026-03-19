@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { markAsDone, deleteFlight } from "@/lib/actions";
 import type { Flight } from "@/db/schema";
-import type { RouteCoords } from "./FlightForm";
-import FlightModal from "./modal/FlightModal";
+import FlightModal, { RouteCoords } from "./modal/FlightModal";
 import ConfirmDialog from "./ui/ConfirmDialog";
 
 type AirportInfo = {
