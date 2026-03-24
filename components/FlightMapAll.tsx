@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Map, MapMarker, MarkerContent, MarkerTooltip, MapRoute } from "@/components/ui/map";
 import { LuFocus } from "react-icons/lu";
 import type { Flight } from "@/db/schema";
@@ -41,57 +42,84 @@ function RoutePopup({ flight, x, y, onClose, onFocus }: { flight: Flight; x: num
       : null;
 
   return (
-    <div className="fixed z-50" style={{ left: x + 16, top: y - 8 }}>
-      <div className="bg-card border border-border rounded-xl shadow-xl min-w-[220px] overflow-hidden text-sm">
-        <div className="flex items-start justify-between px-3 pt-3 pb-2">
-          <div className="flex flex-col">
-            <span className="text-xs text-muted-foreground font-thin mb-1">Route</span>
-            <div className="flex items-center gap-2 text-base font-medium">
-              <span>{flight.departure}</span>
-              <span className="text-muted-foreground">→</span>
-              <span>{flight.arrival}</span>
-            </div>
-            {flight.airline && <span className="text-xs text-muted-foreground mt-0.5">{flight.airline}</span>}
+    <>
+      {/* Desktop: segue il mouse */}
+      <motion.div
+        className="fixed z-50 pointer-events-auto hidden md:block"
+        style={{ left: x + 16, top: y - 8 }}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 8 }}
+        transition={{ duration: 0.15 }}
+      >
+        <PopupContent flight={flight} dist={dist} onClose={onClose} onFocus={onFocus} />
+      </motion.div>
+
+      {/* Mobile: bottom sheet */}
+      <motion.div
+        className="fixed inset-x-0 bottom-0 z-50 px-4 pb-6 md:hidden"
+        initial={{ opacity: 0, y: 80 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 80 }}
+        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+      >
+        <PopupContent flight={flight} dist={dist} onClose={onClose} onFocus={onFocus} />
+      </motion.div>
+    </>
+  );
+}
+
+function PopupContent({ flight, dist, onClose, onFocus }: { flight: Flight; dist: number | null; onClose: () => void; onFocus: () => void }) {
+  return (
+    <div className="bg-card border border-border rounded-xl shadow-xl min-w-[220px] overflow-hidden text-sm">
+      <div className="flex items-start justify-between px-3 pt-3 pb-2">
+        <div className="flex flex-col">
+          <span className="text-xs text-muted-foreground font-thin mb-1">Route</span>
+          <div className="flex items-center gap-2 text-base font-medium">
+            <span>{flight.departure}</span>
+            <span className="text-muted-foreground">→</span>
+            <span>{flight.arrival}</span>
           </div>
-          <div className="flex items-center gap-1 ml-3 mt-0.5 shrink-0">
-            <button onClick={onFocus} className="text-muted-foreground p-1 rounded-md cursor-pointer hover:bg-accent hover:text-white transition-colors" title="Vai al volo">
-              <LuFocus className="w-3.5 h-3.5" />
-            </button>
-            <button onClick={onClose} className="text-muted-foreground p-1 rounded-md cursor-pointer hover:bg-accent hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 6 6 18" />
-                <path d="m6 6 12 12" />
-              </svg>
-            </button>
-          </div>
+          {flight.airline && <span className="text-xs text-muted-foreground mt-0.5">{flight.airline}</span>}
         </div>
-
-        <div className="h-px bg-border" />
-
-        <div className="grid grid-cols-2 px-3 py-2 gap-2">
-          {dist && (
-            <div>
-              <span className="font-semibold">{dist}</span>
-              <span className="text-muted-foreground font-thin"> nm</span>
-            </div>
-          )}
-          <div>
-            <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${flight.done ? "bg-green-500/10 text-green-400" : "bg-primary/10 text-primary"}`}>
-              {flight.done ? "Completato" : "Da fare"}
-            </span>
-          </div>
+        <div className="flex items-center gap-1 ml-3 mt-0.5 shrink-0">
+          <button onClick={onFocus} className="text-muted-foreground p-1 rounded-md cursor-pointer hover:bg-accent hover:text-white transition-colors" title="Vai al volo">
+            <LuFocus className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={onClose} className="text-muted-foreground p-1 rounded-md cursor-pointer hover:bg-accent hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
         </div>
-
-        {(flight.aircraft || flight.tailNumber) && (
-          <>
-            <div className="h-px bg-border" />
-            <div className="px-3 py-2 flex gap-3 text-xs text-muted-foreground">
-              {flight.aircraft && <span>{flight.aircraft}</span>}
-              {flight.tailNumber && <span className="uppercase">{flight.tailNumber}</span>}
-            </div>
-          </>
-        )}
       </div>
+
+      <div className="h-px bg-border" />
+
+      <div className="grid grid-cols-2 px-3 py-2 gap-2">
+        {dist && (
+          <div>
+            <span className="font-semibold">{dist}</span>
+            <span className="text-muted-foreground font-thin"> nm</span>
+          </div>
+        )}
+        <div>
+          <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${flight.done ? "bg-green-500/10 text-green-400" : "bg-primary/10 text-primary"}`}>
+            {flight.done ? "Completato" : "Da fare"}
+          </span>
+        </div>
+      </div>
+
+      {(flight.aircraft || flight.tailNumber) && (
+        <>
+          <div className="h-px bg-border" />
+          <div className="px-3 py-2 flex gap-3 text-xs text-muted-foreground">
+            {flight.aircraft && <span>{flight.aircraft}</span>}
+            {flight.tailNumber && <span className="uppercase">{flight.tailNumber}</span>}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -144,20 +172,23 @@ export default function FlightMapAll({ flights, onFocusFlight }: { flights: Flig
         ))}
       </Map>
 
-      {selectedFlight && (
-        <RoutePopup
-          flight={selectedFlight}
-          x={pos.x}
-          y={pos.y}
-          onClose={() => setSelectedFlight(null)}
-          onFocus={() => {
-            onFocusFlight?.(selectedFlight.id);
-            setSelectedFlight(null);
-          }}
-        />
-      )}
+      <AnimatePresence>
+        {selectedFlight && (
+          <RoutePopup
+            flight={selectedFlight}
+            x={pos.x}
+            y={pos.y}
+            onClose={() => setSelectedFlight(null)}
+            onFocus={() => {
+              onFocusFlight?.(selectedFlight.id);
+              setSelectedFlight(null);
+            }}
+          />
+        )}
+      </AnimatePresence>
 
-      <div className="absolute bottom-4 left-4 z-10 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 flex flex-col gap-2 text-xs text-white">
+      {/* Legenda */}
+      <div className="lg:flex hidden absolute bottom-20 md:bottom-4 left-4 z-10 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3  flex-col gap-2 text-xs text-white">
         <div className="flex items-center gap-2">
           <svg width="32" height="8">
             <line x1="0" y1="4" x2="32" y2="4" stroke="#7c3bed" strokeWidth="2" />

@@ -46,7 +46,7 @@ export default function Dock({ onAddFlight, onToggleView, view }: { onAddFlight:
 
   return (
     <Tooltip.Provider>
-      <nav className="absolute  z-10 bottom-6 left-1/2 -translate-x-1/2">
+      <nav className="absolute z-10 lg:bottom-6 bottom-10 left-1/2 -translate-x-1/2">
         <motion.div
           onMouseMove={(e) => mouseX.set(e.pageX)}
           onMouseLeave={() => mouseX.set(Infinity)}

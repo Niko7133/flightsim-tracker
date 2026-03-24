@@ -38,16 +38,6 @@ export default function FlightCard({
   const [modalOpen, setModalOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const [copied, setCopied] = useState<string | null>(null);
-
-  const copyClass = (key: string) => `cursor-pointer transition-colors duration-150 ${copied === key ? "text-green-400" : "hover:text-white"}`;
-
-  function copyToClipboard(value: string | null, key: string) {
-    if (!value) return;
-    navigator.clipboard.writeText(value);
-    setCopied(key);
-    setTimeout(() => setCopied(null), 1500);
-  }
 
   const route =
     flight.departureLat && flight.departureLon && flight.arrivalLat && flight.arrivalLon
@@ -61,67 +51,133 @@ export default function FlightCard({
       })()
     : null;
 
-  console.log(flight);
-
   return (
     <>
+      {/* ── MOBILE ── */}
+      <div
+        onClick={() => selecting && onSelect?.(flight.id)}
+        className={`md:hidden flex flex-col bg-card border-b border-border last:border-b-0 transition-colors duration-150
+          ${selecting ? "cursor-pointer" : ""}
+          ${selected ? "bg-destructive/10" : ""}
+          ${highlighted ? "ring-2 ring-inset ring-primary" : ""}
+        `}
+      >
+        {/* Top row: icon + airline + actions */}
+        <div className="flex items-center justify-between px-4 pt-3 pb-2">
+          <div className="flex items-center gap-2">
+            {flight.done ? <LuPlaneLanding className="w-4 h-4 text-green-500 shrink-0" /> : <LuPlaneTakeoff className="w-4 h-4 text-muted-foreground shrink-0" />}
+            <span className="text-sm truncate max-w-[140px]">{flight.airline ?? "—"}</span>
+            {flight.flightNumber && <span className="text-xs text-muted-foreground font-mono">{flight.flightNumber}</span>}
+          </div>
+          {!selecting && (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  markAsDone(flight.id, !flight.done);
+                }}
+                className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-accent transition-colors cursor-pointer"
+              >
+                <LuCheck className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setModalOpen(true);
+                }}
+                className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-accent transition-colors cursor-pointer"
+              >
+                <LuPencil className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setConfirmOpen(true);
+                }}
+                className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-accent text-destructive transition-colors cursor-pointer"
+              >
+                <LuX className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Route */}
+        <div className="flex items-center gap-3 px-4 pb-3">
+          <div className="text-center shrink-0">
+            <div className="text-lg font-bold tracking-wide">{flight.departure}</div>
+            {flight.departureName && <div className="text-xs text-muted-foreground truncate max-w-[80px]">{flight.departureName}</div>}
+          </div>
+
+          <div className="flex-1 flex flex-col items-center">
+            <div className="relative w-full flex items-center">
+              <div className="flex-1 border-b border-dashed border-border" />
+              <div className="mx-2 flex flex-col items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-muted-foreground"
+                >
+                  <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" />
+                </svg>
+                {flightStats && <span className="text-xs text-muted-foreground mt-0.5">{flightStats.duration}</span>}
+              </div>
+              <div className="flex-1 border-b border-dashed border-border" />
+            </div>
+          </div>
+
+          <div className="text-center shrink-0">
+            <div className="text-lg font-bold tracking-wide">{flight.arrival}</div>
+            {flight.arrivalName && <div className="text-xs text-muted-foreground truncate max-w-[80px]">{flight.arrivalName}</div>}
+          </div>
+        </div>
+
+        {/* Bottom row: aircraft + tail + distance */}
+        {(flight.aircraft || flight.tailNumber || flightStats) && (
+          <div className="flex items-center gap-3 px-4 pb-3 text-xs text-muted-foreground">
+            {flight.aircraft && <span>{flight.aircraft}</span>}
+            {flight.tailNumber && <span className="uppercase">{flight.tailNumber}</span>}
+            {flightStats && <span className="ml-auto">{flightStats.dist} nm</span>}
+          </div>
+        )}
+      </div>
+
+      {/* ── DESKTOP ── */}
       <div
         onClick={() => selecting && onSelect?.(flight.id)}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className={`group flex items-center justify-between gap-0 bg-card border-b border-border last:border-b-0 transition-colors duration-150
+        className={`hidden md:flex items-center justify-between gap-0 bg-card border-b border-border last:border-b-0 transition-colors duration-150
           ${selecting ? "cursor-pointer" : "hover:bg-accent/30"}
           ${selected ? "bg-destructive/10 border-destructive" : ""}
           ${highlighted ? "ring-2 ring-inset ring-primary" : ""}
         `}
       >
         <div className="flex flex-row items-center">
-          {/* Airline icon */}
           <div className="shrink-0 w-12 flex items-center justify-center py-4 pl-3">
             {flight.done ? <LuPlaneLanding className="w-4 h-4 text-green-500" /> : <LuPlaneTakeoff className="w-4 h-4 text-muted-foreground" />}
           </div>
-
-          {/* Separator */}
           <div className="w-px h-8 bg-border shrink-0" />
-
-          {/* Airline */}
-          <div onClick={() => copyToClipboard(flight.airline, "airline")} className={`shrink-0 min-w-60 px-4 text-sm truncate ${copyClass("airline")}`}>
-            {flight.airline ?? "—"}
-          </div>
-
-          {/* Separator */}
+          <div className="shrink-0 min-w-60 px-4 text-sm truncate">{flight.airline ?? "—"}</div>
           <div className="w-px h-8 bg-border shrink-0" />
-
-          {/* Aircraft */}
-          <div onClick={() => copyToClipboard(flight.aircraft, "aircraft")} className={`shrink-0 min-w-60 px-4 text-center text-sm text-muted-foreground truncate ${copyClass("aircraft")}`}>
-            {flight.aircraft ?? "—"}
-          </div>
-
-          {/* Separator */}
+          <div className="shrink-0 min-w-60 px-4 text-center text-sm text-muted-foreground truncate">{flight.aircraft ?? "—"}</div>
           <div className="w-px h-8 bg-border shrink-0" />
-
-          {/* Tail number */}
-          <div
-            onClick={() => copyToClipboard(flight.tailNumber, "tailNumber")}
-            className={`shrink-0 w-30 px-4 text-center text-sm text-muted-foreground truncate uppercase ${copyClass("tailNumber")}`}
-          >
-            {flight.tailNumber ?? "—"}
-          </div>
-
-          {/* Separator */}
+          <div className="shrink-0 w-30 px-4 text-center text-sm text-muted-foreground truncate uppercase">{flight.tailNumber ?? "—"}</div>
           <div className="w-px h-8 bg-border shrink-0" />
         </div>
 
-        {/* Route */}
         <div className="flex-1 px-8 flex items-center gap-3 w-1/2">
           <div className="text-center shrink-0">
-            {/* Departure */}
-            <div onClick={() => copyToClipboard(flight.departure, "departure")} className={`text-base font-bold tracking-wide ${copyClass("departure")}`}>
-              {flight.departure}
-            </div>
+            <div className="text-base font-bold tracking-wide">{flight.departure}</div>
             <div className="text-xs text-muted-foreground truncate max-w-[100px]">{flight.departureName ?? ""}</div>
           </div>
-
           <div className="flex-1 flex flex-col items-center gap-0.5">
             <div className="relative w-full flex items-center">
               <div className="flex-1 border-b border-dashed border-border" />
@@ -145,17 +201,12 @@ export default function FlightCard({
               <div className="flex-1 border-b border-dashed border-border" />
             </div>
           </div>
-
           <div className="text-center shrink-0">
-            {/* Arrival */}
-            <div onClick={() => copyToClipboard(flight.arrival, "arrival")} className={`text-base font-bold tracking-wide ${copyClass("arrival")}`}>
-              {flight.arrival}
-            </div>
+            <div className="text-base font-bold tracking-wide">{flight.arrival}</div>
             <div className="text-xs text-muted-foreground truncate max-w-[100px]">{flight.arrivalName ?? ""}</div>
           </div>
         </div>
 
-        {/* Actions */}
         {!selecting && (
           <motion.div animate={{ width: hovered ? "auto" : 0, opacity: hovered ? 1 : 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-1 pr-3 overflow-hidden shrink-0">
             <button

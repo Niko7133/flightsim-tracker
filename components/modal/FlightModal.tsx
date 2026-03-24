@@ -6,6 +6,7 @@ import AircraftInput from "../ui/AircraftInput";
 import Button from "../ui/button";
 import type { Flight } from "@/db/schema";
 import { addFlight, updateFlight } from "@/lib/actions";
+import { motion, AnimatePresence } from "framer-motion";
 
 const inputClass =
   "flex h-9 w-full border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm rounded-xl";
@@ -146,174 +147,184 @@ export default function FlightModal({ open, onClose, onRouteChange, flight }: Pr
       : null;
 
   return (
-    <div
-      className={`fixed inset-0 z-1000 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 transition-opacity duration-200 ${
-        open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-      }`}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div key={flight?.id ?? "new"} className="flex flex-col min-w-5/12 w-fit max-h-[90vh] rounded-2xl border border-white/8 bg-background shadow-2xl overflow-hidden p-6 gap-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">{flight ? `${flight.departure} → ${flight.arrival}` : "Nuovo volo"}</h2>
-          <Button variant="close" size="icon" onClick={onClose}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-white/50"
-            >
-              <path d="M18 6 6 18" />
-              <path d="m6 6 12 12" />
-            </svg>
-          </Button>
-        </div>
+    <AnimatePresence>
+      {open && (
+        <div
+          className="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-sm flex items-end md:items-center justify-center md:p-6"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) onClose();
+          }}
+        >
+          <motion.div
+            key={flight?.id ?? "new"}
+            className="flex flex-col w-full md:min-w-5/12 md:w-fit max-h-[95vh] md:max-h-[90vh] rounded-t-2xl md:rounded-2xl border border-white/8 bg-background shadow-2xl overflow-y-auto p-4 md:p-6 gap-4"
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "100%", opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          >
+            {/* Handle mobile */}
+            <div className="md:hidden flex justify-center mb-1">
+              <div className="w-10 h-1 rounded-full bg-white/20" />
+            </div>
 
-        <form key={formKey} ref={formRef} action={handleSubmit} className="space-y-5">
-          {/* Tabs */}
-          <div className="inline-flex h-9 items-center justify-center bg-muted p-1 text-muted-foreground rounded-xl w-full">
-            <button
-              type="button"
-              onClick={() => setActiveTab("volo")}
-              className={`flex-1 inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all cursor-pointer ${activeTab === "volo" ? "bg-background text-foreground shadow" : "hover:text-foreground"}`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" />
-              </svg>
-              Volo
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("addons")}
-              className={`flex-1 inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all cursor-pointer ${activeTab === "addons" ? "bg-background text-foreground shadow" : "hover:text-foreground"}`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z" />
-                <path d="M7 7h.01" />
-              </svg>
-              Addons
-            </button>
-          </div>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-white">{flight ? `${flight.departure} → ${flight.arrival}` : "Nuovo volo"}</h2>
+              <Button variant="close" size="icon" onClick={onClose}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-white/50"
+                >
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </Button>
+            </div>
 
-          {activeTab === "volo" && (
-            <>
-              <div className="grid grid-cols-2 gap-3">
-                {/* Callsign + Flight Number */}
-                <div>
-                  <label className={labelClass}>Callsign</label>
-                  <input name="callSign" placeholder="EDW15KT" onChange={handleCallSignChange} className={`${inputClass} font-mono uppercase`} />
-                </div>
-                <div>
-                  <label className={labelClass}>Flight Number</label>
-                  <input name="flightNumber" placeholder="FR1234" defaultValue={flight?.flightNumber ?? ""} className={`${inputClass} font-mono uppercase`} />
-                </div>
-
-                {/* Departure */}
-                <div className="space-y-3">
-                  <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">Departure</p>
-                  <div>
-                    <label className={labelClass}>ICAO / IATA</label>
-                    <AirportInput key={`dep-${airportInputKey}`} name="departure" onResolved={handleDepResolved} defaultValue={depDefault} />
-                  </div>
-                  {depInfo && <AirportCard info={depInfo} />}
-                </div>
-
-                {/* Arrival */}
-                <div className="space-y-3">
-                  <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">Arrival</p>
-                  <div>
-                    <label className={labelClass}>ICAO / IATA</label>
-                    <AirportInput key={`arr-${airportInputKey}`} name="arrival" onResolved={handleArrResolved} defaultValue={arrDefault} />
-                  </div>
-                  {arrInfo && <AirportCard info={arrInfo} />}
-                </div>
+            <form key={formKey} ref={formRef} action={handleSubmit} className="space-y-5">
+              {/* Tabs */}
+              <div className="inline-flex h-9 items-center justify-center bg-muted p-1 text-muted-foreground rounded-xl w-full">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("volo")}
+                  className={`flex-1 inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all cursor-pointer ${activeTab === "volo" ? "bg-background text-foreground shadow" : "hover:text-foreground"}`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" />
+                  </svg>
+                  Volo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("addons")}
+                  className={`flex-1 inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all cursor-pointer ${activeTab === "addons" ? "bg-background text-foreground shadow" : "hover:text-foreground"}`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z" />
+                    <path d="M7 7h.01" />
+                  </svg>
+                  Addons
+                </button>
               </div>
 
-              {/* Flight stats */}
-              {flightStats && (
-                <div className="rounded-xl border border-white/8 bg-white/3 px-4 py-3 flex justify-between items-center text-xs">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-white/40">Distanza</span>
-                    <span className="text-white font-medium">{flightStats.dist} NM</span>
+              {activeTab === "volo" && (
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className={labelClass}>Callsign</label>
+                      <input name="callSign" placeholder="EDW15KT" onChange={handleCallSignChange} className={`${inputClass} font-mono uppercase`} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Flight Number</label>
+                      <input name="flightNumber" placeholder="FR1234" defaultValue={flight?.flightNumber ?? ""} className={`${inputClass} font-mono uppercase`} />
+                    </div>
                   </div>
-                  <div className="w-px h-8 bg-white/8" />
-                  <div className="flex flex-col gap-0.5 items-center">
-                    <span className="text-white/40">Velocità crociera</span>
-                    <span className="text-white font-medium">{cruiseSpeed} kts</span>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-3">
+                      <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">Departure</p>
+                      <div>
+                        <label className={labelClass}>ICAO / IATA</label>
+                        <AirportInput key={`dep-${airportInputKey}`} name="departure" onResolved={handleDepResolved} defaultValue={depDefault} />
+                      </div>
+                      {depInfo && <AirportCard info={depInfo} />}
+                    </div>
+                    <div className="space-y-3">
+                      <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">Arrival</p>
+                      <div>
+                        <label className={labelClass}>ICAO / IATA</label>
+                        <AirportInput key={`arr-${airportInputKey}`} name="arrival" onResolved={handleArrResolved} defaultValue={arrDefault} />
+                      </div>
+                      {arrInfo && <AirportCard info={arrInfo} />}
+                    </div>
                   </div>
-                  <div className="w-px h-8 bg-white/8" />
-                  <div className="flex flex-col gap-0.5 items-end">
-                    <span className="text-white/40">Tempo stimato</span>
-                    <span className="text-blue-400 font-semibold">{flightStats.duration}</span>
+
+                  {flightStats && (
+                    <div className="rounded-xl border border-white/8 bg-white/3 px-4 py-3 flex justify-between items-center text-xs">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-white/40">Distanza</span>
+                        <span className="text-white font-medium">{flightStats.dist} NM</span>
+                      </div>
+                      <div className="w-px h-8 bg-white/8" />
+                      <div className="flex flex-col gap-0.5 items-center">
+                        <span className="text-white/40">Velocità crociera</span>
+                        <span className="text-white font-medium">{cruiseSpeed} kts</span>
+                      </div>
+                      <div className="w-px h-8 bg-white/8" />
+                      <div className="flex flex-col gap-0.5 items-end">
+                        <span className="text-white/40">Tempo stimato</span>
+                        <span className="text-blue-400 font-semibold">{flightStats.duration}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">Flight Details</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className={labelClass}>Aircraft Type</label>
+                        <AircraftInput onSpeedChange={setCruiseSpeed} defaultValue={flight?.aircraft ?? undefined} />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Airline</label>
+                        <input name="airline" placeholder="ITA Airways" value={airlineDefault ?? ""} onChange={(e) => setAirlineDefault(e.target.value)} className={inputClass} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className={labelClass}>
+                          Tail Number <span className="text-white/20">(optional)</span>
+                        </label>
+                        <input name="tailNumber" placeholder="I-ABCD" defaultValue={flight?.tailNumber ?? ""} className={`${inputClass} font-mono uppercase`} />
+                      </div>
+                      <div>
+                        <label className={labelClass}>
+                          FR24 Link <span className="text-white/20">(optional)</span>
+                        </label>
+                        <input name="flightradarUrl" type="url" placeholder="https://..." defaultValue={flight?.flightradarUrl ?? ""} className={inputClass} />
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {activeTab === "addons" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 py-4">
+                  <div>
+                    <label className={labelClass}>Link scenario partenza{depInfo && <span className="text-white/30 ml-1">· {flight?.departure}</span>}</label>
+                    <input name="depScenarioUrl" type="url" placeholder="https://..." defaultValue={flight?.depScenarioUrl ?? ""} className={inputClass} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Link scenario arrivo{arrInfo && <span className="text-white/30 ml-1">· {flight?.arrival}</span>}</label>
+                    <input name="arrScenarioUrl" type="url" placeholder="https://..." defaultValue={flight?.arrScenarioUrl ?? ""} className={inputClass} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Link livrea</label>
+                    <input name="liveryUrl" type="url" placeholder="https://..." defaultValue={flight?.liveryUrl ?? ""} className={inputClass} />
                   </div>
                 </div>
               )}
 
-              {/* Flight details */}
-              <div className="space-y-3">
-                <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">Flight Details</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className={labelClass}>Aircraft Type</label>
-                    <AircraftInput onSpeedChange={setCruiseSpeed} defaultValue={flight?.aircraft ?? undefined} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Airline</label>
-                    <input name="airline" placeholder="ITA Airways" value={airlineDefault ?? ""} onChange={(e) => setAirlineDefault(e.target.value)} className={inputClass} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className={labelClass}>
-                      Tail Number <span className="text-white/20">(optional)</span>
-                    </label>
-                    <input name="tailNumber" placeholder="I-ABCD" defaultValue={flight?.tailNumber ?? ""} className={`${inputClass} font-mono uppercase`} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>
-                      FR24 Link <span className="text-white/20">(optional)</span>
-                    </label>
-                    <input name="flightradarUrl" type="url" placeholder="https://..." defaultValue={flight?.flightradarUrl ?? ""} className={inputClass} />
-                  </div>
-                </div>
+              <div className="flex gap-3 pt-2">
+                <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
+                  Annulla
+                </Button>
+                <Button type="submit" disabled={isSubmitting} className="flex-1">
+                  {isSubmitting ? "Saving..." : flight ? "Aggiorna volo" : "Crea volo"}
+                </Button>
               </div>
-            </>
-          )}
-
-          {activeTab === "addons" && (
-            <div className="grid grid-cols-2 items-center justify-center py-12 text-white/20 text-sm gap-2">
-              <div>
-                <label className={labelClass}>Link scenario partenza{depInfo && <span className="text-white/30 ml-1">· {flight?.departure}</span>}</label>
-                <input name="depScenarioUrl" type="url" placeholder="https://..." defaultValue={flight?.depScenarioUrl ?? ""} className={inputClass} />
-              </div>
-              <div>
-                <label className={labelClass}>Link scenario arrivo{arrInfo && <span className="text-white/30 ml-1">· {flight?.arrival}</span>}</label>
-                <input name="arrScenarioUrl" type="url" placeholder="https://..." defaultValue={flight?.arrScenarioUrl ?? ""} className={inputClass} />
-              </div>
-              <div>
-                <label className={labelClass}>Link livrea</label>
-                <input name="liveryUrl" type="url" placeholder="https://..." defaultValue={flight?.liveryUrl ?? ""} className={inputClass} />
-              </div>
-            </div>
-          )}
-
-          <div className="flex gap-3 pt-2">
-            <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
-              Annulla
-            </Button>
-            <Button type="submit" disabled={isSubmitting} className="flex-1">
-              {isSubmitting ? "Saving..." : flight ? "Aggiorna volo" : "Crea volo"}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }

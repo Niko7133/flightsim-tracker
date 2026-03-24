@@ -59,7 +59,7 @@ export default function FlightListSearch({
   const done = filtered.filter((f) => f.done);
 
   const tabClass = (t: TabFilter) =>
-    `inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer ${
+    `flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer ${
       tab === t ? "bg-background text-foreground shadow" : "text-muted-foreground hover:text-foreground"
     }`;
 
@@ -77,8 +77,9 @@ export default function FlightListSearch({
     <>
       <div className="flex-1 w-full flex flex-col gap-4">
         {/* Toolbar */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
+        <div className="flex flex-col gap-3">
+          {/* Search */}
+          <div className="relative">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -102,7 +103,8 @@ export default function FlightListSearch({
             />
           </div>
 
-          <div role="tablist" className="inline-flex h-9 items-center justify-center bg-muted p-1 text-muted-foreground rounded-xl" style={{ outline: "none" }}>
+          {/* Tabs — full width su mobile, auto su desktop */}
+          <div role="tablist" className="inline-flex h-9 w-full items-center justify-center bg-muted p-1 text-muted-foreground rounded-xl" style={{ outline: "none" }}>
             <button type="button" role="tab" onClick={() => setTab("all")} aria-selected={tab === "all"} className={tabClass("all")}>
               Tutti
             </button>
