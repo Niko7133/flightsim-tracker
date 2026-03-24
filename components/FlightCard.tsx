@@ -106,7 +106,6 @@ export default function FlightCard({
         <div className="flex items-center gap-3 px-4 pb-3">
           <div className="text-center shrink-0">
             <div className="text-lg font-bold tracking-wide">{flight.departure}</div>
-            {flight.departureName && <div className="text-xs text-muted-foreground truncate max-w-[80px]">{flight.departureName}</div>}
           </div>
 
           <div className="flex-1 flex flex-col items-center">
@@ -135,7 +134,6 @@ export default function FlightCard({
 
           <div className="text-center shrink-0">
             <div className="text-lg font-bold tracking-wide">{flight.arrival}</div>
-            {flight.arrivalName && <div className="text-xs text-muted-foreground truncate max-w-[80px]">{flight.arrivalName}</div>}
           </div>
         </div>
 
@@ -176,7 +174,6 @@ export default function FlightCard({
         <div className="flex-1 px-8 flex items-center gap-3 w-1/2">
           <div className="text-center shrink-0">
             <div className="text-base font-bold tracking-wide">{flight.departure}</div>
-            <div className="text-xs text-muted-foreground truncate max-w-[100px]">{flight.departureName ?? ""}</div>
           </div>
           <div className="flex-1 flex flex-col items-center gap-0.5">
             <div className="relative w-full flex items-center">
@@ -203,7 +200,6 @@ export default function FlightCard({
           </div>
           <div className="text-center shrink-0">
             <div className="text-base font-bold tracking-wide">{flight.arrival}</div>
-            <div className="text-xs text-muted-foreground truncate max-w-[100px]">{flight.arrivalName ?? ""}</div>
           </div>
         </div>
 
