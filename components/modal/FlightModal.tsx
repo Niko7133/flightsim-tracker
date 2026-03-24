@@ -62,10 +62,20 @@ export default function FlightModal({ open, onClose, onRouteChange, flight }: Pr
   const [activeTab, setActiveTab] = useState<"volo" | "addons">("volo");
   const [depDefault, setDepDefault] = useState<string | undefined>(flight?.departure);
   const [arrDefault, setArrDefault] = useState<string | undefined>(flight?.arrival);
-  const [airLineDefault, setAirLineDefault] = useState<string | undefined>(undefined);
+  const [airlineDefault, setAirlineDefault] = useState<string | undefined>(flight?.airline ?? undefined);
   const [airportInputKey, setAirportInputKey] = useState(0);
   const [formKey, setFormKey] = useState(0);
   const callSignTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setAirlineDefault(flight?.airline ?? undefined);
+    setDepDefault(flight?.departure);
+    setArrDefault(flight?.arrival);
+  }, [flight]);
+
+  useEffect(() => {
+    if (open) setActiveTab("volo");
+  }, [open]);
 
   function handleCallSignChange(e: React.ChangeEvent<HTMLInputElement>) {
     const val = e.target.value.toUpperCase();
@@ -79,7 +89,7 @@ export default function FlightModal({ open, onClose, onRouteChange, flight }: Pr
           if (route?.origin?.icao_code && route?.destination?.icao_code) {
             setDepDefault(route.origin.icao_code);
             setArrDefault(route.destination.icao_code);
-            setAirLineDefault(route.airline?.name);
+            setAirlineDefault(route.airline?.name);
             setAirportInputKey((k) => k + 1);
           }
         } catch {
@@ -117,7 +127,7 @@ export default function FlightModal({ open, onClose, onRouteChange, flight }: Pr
       setArrInfo(null);
       setDepDefault(undefined);
       setArrDefault(undefined);
-      setAirLineDefault(undefined);
+      setAirlineDefault(undefined);
       setAirportInputKey(0);
       setFormKey((k) => k + 1);
       onRouteChange?.(null);
@@ -134,10 +144,6 @@ export default function FlightModal({ open, onClose, onRouteChange, flight }: Pr
           return { dist: Math.round(dist), duration: formatDuration(time) };
         })()
       : null;
-
-  useEffect(() => {
-    if (open) setActiveTab("volo");
-  }, [open]);
 
   return (
     <div
@@ -171,6 +177,7 @@ export default function FlightModal({ open, onClose, onRouteChange, flight }: Pr
         </div>
 
         <form key={formKey} ref={formRef} action={handleSubmit} className="space-y-5">
+          {/* Tabs */}
           <div className="inline-flex h-9 items-center justify-center bg-muted p-1 text-muted-foreground rounded-xl w-full">
             <button
               type="button"
@@ -198,10 +205,17 @@ export default function FlightModal({ open, onClose, onRouteChange, flight }: Pr
           {activeTab === "volo" && (
             <>
               <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
-                  <label className={labelClass}>Aircraft Callsign</label>
+                {/* Callsign + Flight Number */}
+                <div>
+                  <label className={labelClass}>Callsign</label>
                   <input name="callSign" placeholder="EDW15KT" onChange={handleCallSignChange} className={`${inputClass} font-mono uppercase`} />
                 </div>
+                <div>
+                  <label className={labelClass}>Flight Number</label>
+                  <input name="flightNumber" placeholder="FR1234" defaultValue={flight?.flightNumber ?? ""} className={`${inputClass} font-mono uppercase`} />
+                </div>
+
+                {/* Departure */}
                 <div className="space-y-3">
                   <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">Departure</p>
                   <div>
@@ -210,6 +224,8 @@ export default function FlightModal({ open, onClose, onRouteChange, flight }: Pr
                   </div>
                   {depInfo && <AirportCard info={depInfo} />}
                 </div>
+
+                {/* Arrival */}
                 <div className="space-y-3">
                   <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">Arrival</p>
                   <div>
@@ -220,6 +236,7 @@ export default function FlightModal({ open, onClose, onRouteChange, flight }: Pr
                 </div>
               </div>
 
+              {/* Flight stats */}
               {flightStats && (
                 <div className="rounded-xl border border-white/8 bg-white/3 px-4 py-3 flex justify-between items-center text-xs">
                   <div className="flex flex-col gap-0.5">
@@ -239,6 +256,7 @@ export default function FlightModal({ open, onClose, onRouteChange, flight }: Pr
                 </div>
               )}
 
+              {/* Flight details */}
               <div className="space-y-3">
                 <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">Flight Details</p>
                 <div className="grid grid-cols-2 gap-3">
@@ -248,13 +266,7 @@ export default function FlightModal({ open, onClose, onRouteChange, flight }: Pr
                   </div>
                   <div>
                     <label className={labelClass}>Airline</label>
-                    <input
-                      name="flightNumber"
-                      placeholder="ITA Airways"
-                      value={airLineDefault ?? ""}
-                      onChange={(e) => setAirLineDefault(e.target.value)}
-                      className={`${inputClass} font-mono uppercase`}
-                    />
+                    <input name="airline" placeholder="ITA Airways" value={airlineDefault ?? ""} onChange={(e) => setAirlineDefault(e.target.value)} className={inputClass} />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">

@@ -48,11 +48,15 @@ body {
   height: 100%;
 }
 
-.icons {
-  transition: width 0.3s ease-out;
-  cursor: pointer;
+@keyframes infinite-scroll-y {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
 }
 
-.icons:hover {
-  width: 3rem;
+.animate-infinite-scroll-y {
+  animation: infinite-scroll-y 8s linear infinite;
 }

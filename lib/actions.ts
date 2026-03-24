@@ -11,6 +11,7 @@ export async function addFlight(formData: FormData) {
   const aircraft = formData.get("aircraft") as string;
   const tailNumber = formData.get("tailNumber") as string;
   const flightNumber = formData.get("flightNumber") as string;
+  const airline = formData.get("airline") as string;
   const flightradarUrl = formData.get("flightradarUrl") as string;
   const notes = formData.get("notes") as string;
   const departureLat = parseFloat(formData.get("departureLat") as string) || null;
@@ -27,6 +28,7 @@ export async function addFlight(formData: FormData) {
     aircraft,
     tailNumber,
     flightNumber,
+    airline,
     flightradarUrl,
     notes,
     departureLat,
@@ -46,6 +48,7 @@ export async function updateFlight(id: number, formData: FormData) {
   const aircraft = formData.get("aircraft") as string;
   const tailNumber = formData.get("tailNumber") as string;
   const flightNumber = formData.get("flightNumber") as string;
+  const airline = formData.get("airline") as string;
   const flightradarUrl = formData.get("flightradarUrl") as string;
   const depScenarioUrl = formData.get("depScenarioUrl") as string;
   const arrScenarioUrl = formData.get("arrScenarioUrl") as string;
@@ -58,7 +61,7 @@ export async function updateFlight(id: number, formData: FormData) {
 
   await db
     .update(flights)
-    .set({ departure, arrival, aircraft, tailNumber, flightNumber, flightradarUrl, depScenarioUrl, arrScenarioUrl, liveryUrl, notes, departureLat, departureLon, arrivalLat, arrivalLon })
+    .set({ departure, arrival, aircraft, tailNumber, flightNumber, airline, flightradarUrl, depScenarioUrl, arrScenarioUrl, liveryUrl, notes, departureLat, departureLon, arrivalLat, arrivalLon })
     .where(eq(flights.id, id));
 
   revalidatePath("/");

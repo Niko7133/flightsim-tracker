@@ -4,15 +4,32 @@ import { useState, useEffect } from "react";
 import FlightCard from "./FlightCard";
 import type { Flight } from "@/db/schema";
 import FlightModal from "./modal/FlightModal";
-import type { RouteCoords } from "./modal/FlightModal";
+import FlightEmpty from "./ui/FlightEmpty";
 
 type TabFilter = "all" | "pending" | "done";
 
-export default function FlightListSearch({ flights, externalModalOpen, onExternalModalClose }: { flights: Flight[]; externalModalOpen?: boolean; onExternalModalClose?: () => void }) {
+export default function FlightListSearch({
+  flights,
+  externalModalOpen,
+  onExternalModalClose,
+  highlightedFlightId,
+  onClearHighlight,
+}: {
+  flights: Flight[];
+  externalModalOpen?: boolean;
+  onExternalModalClose?: () => void;
+  highlightedFlightId?: number | null;
+  onClearHighlight?: () => void;
+}) {
   const [query, setQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
-  const [grid, setGrid] = useState(false);
   const [tab, setTab] = useState<TabFilter>("all");
+  const [selecting, setSelecting] = useState(false);
+  const [selectedFlights, setSelectedFlights] = useState<number[]>([]);
+
+  function toggleSelect(id: number) {
+    setSelectedFlights((prev) => (prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]));
+  }
 
   useEffect(() => {
     if (externalModalOpen) setModalOpen(true);
@@ -30,14 +47,28 @@ export default function FlightListSearch({ flights, externalModalOpen, onExterna
     return matchesQuery && matchesTab;
   });
 
+  const pending = filtered.filter((f) => !f.done);
+  const done = filtered.filter((f) => f.done);
+
   const tabClass = (t: TabFilter) =>
     `inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer ${
       tab === t ? "bg-background text-foreground shadow" : "text-muted-foreground hover:text-foreground"
     }`;
 
+  function renderCards(list: Flight[]) {
+    return (
+      <div className="rounded-xl border border-border overflow-hidden">
+        {list.map((flight) => (
+          <FlightCard key={flight.id} flight={flight} selecting={selecting} selected={selectedFlights.includes(flight.id)} onSelect={toggleSelect} highlighted={flight.id === highlightedFlightId} />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <>
-      <div className="flex-1 min-w-0 flex flex-col gap-4">
+      <div className="flex-1 w-full flex flex-col gap-4">
+        {/* Toolbar */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <svg
@@ -76,17 +107,44 @@ export default function FlightListSearch({ flights, externalModalOpen, onExterna
           </div>
         </div>
 
-        <p className="text-sm text-zinc-500 uppercase tracking-wider font-medium">
-          {tab === "all" ? "Tutti" : tab === "pending" ? "Da fare" : "Completati"} · {filtered.length}
-        </p>
+        {/* Empty state */}
+        {filtered.length === 0 && (
+          <FlightEmpty
+            hasFlights={flights.length > 0}
+            hasFilters={query !== "" || tab !== "all"}
+            onAddFlight={() => setModalOpen(true)}
+            onShowAll={() => {
+              setQuery("");
+              setTab("all");
+            }}
+          />
+        )}
 
-        {filtered.length === 0 && <p className="text-zinc-600 text-sm">Nessun volo trovato.</p>}
-
-        <div className={grid ? "grid grid-cols-2 gap-3" : "flex flex-col gap-3"}>
-          {filtered.map((flight) => (
-            <FlightCard key={flight.id} flight={flight} />
+        {/* Cards */}
+        {filtered.length > 0 &&
+          (tab === "all" ? (
+            <div className="flex flex-col gap-6">
+              {pending.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Da fare · {pending.length}</p>
+                  {renderCards(pending)}
+                </div>
+              )}
+              {done.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Completati · {done.length}</p>
+                  {renderCards(done)}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                {tab === "pending" ? "Da fare" : "Completati"} · {filtered.length}
+              </p>
+              {renderCards(filtered)}
+            </div>
           ))}
-        </div>
       </div>
 
       <FlightModal open={modalOpen} onClose={closeModal} />

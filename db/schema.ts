@@ -8,6 +8,7 @@ export const flights = pgTable("flights", {
   tailNumber: text("tail_number"),
   flightNumber: text("flight_number"),
   flightradarUrl: text("flightradar_url"),
+  airline: text("airline"),
   notes: text("notes"),
   done: boolean("done").default(false).notNull(),
   departureLat: doublePrecision("departure_lat"),
