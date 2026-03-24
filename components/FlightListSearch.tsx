@@ -27,6 +27,14 @@ export default function FlightListSearch({
   const [selecting, setSelecting] = useState(false);
   const [selectedFlights, setSelectedFlights] = useState<number[]>([]);
 
+  useEffect(() => {
+    if (!highlightedFlightId) return;
+    const timeout = setTimeout(() => {
+      onClearHighlight?.();
+    }, 1500);
+    return () => clearTimeout(timeout);
+  }, [highlightedFlightId]);
+
   function toggleSelect(id: number) {
     setSelectedFlights((prev) => (prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]));
   }
