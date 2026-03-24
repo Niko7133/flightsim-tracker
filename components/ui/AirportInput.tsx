@@ -15,7 +15,7 @@ export type AirportInfo = {
 };
 
 const inputClass =
-  "flex h-9 w-full border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm rounded-xl";
+  "flex h-9 w-full border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm rounded-xl";
 
 export default function AirportInput({ name, onResolved, defaultValue }: { name: string; onResolved?: (info: AirportInfo | null) => void; defaultValue?: string }) {
   const [value, setValue] = useState(defaultValue ?? "");

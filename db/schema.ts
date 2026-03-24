@@ -1,4 +1,4 @@
-import { pgTable, serial, text, boolean, timestamp, doublePrecision, integer } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, boolean, timestamp, doublePrecision } from "drizzle-orm/pg-core";
 
 export const flights = pgTable("flights", {
   id: serial("id").primaryKey(),
@@ -18,17 +18,6 @@ export const flights = pgTable("flights", {
   depScenarioUrl: text("dep_scenario_url"),
   arrScenarioUrl: text("arr_scenario_url"),
   liveryUrl: text("livery_url"),
-  userId: integer("user_id")
-    .notNull()
-    .references(() => users.id),
-});
-
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  email: text("email").notNull().unique(),
-  password: text("password").notNull(),
-  name: text("name"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const airports = pgTable("airports", {
@@ -45,5 +34,3 @@ export const airports = pgTable("airports", {
 export type Flight = typeof flights.$inferSelect;
 export type NewFlight = typeof flights.$inferInsert;
 export type Airport = typeof airports.$inferSelect;
-export type User = typeof users.$inferSelect;
-export type NewUser = typeof users.$inferInsert;

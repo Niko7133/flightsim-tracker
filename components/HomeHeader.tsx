@@ -1,50 +1,46 @@
 "use client";
 
 import { useState } from "react";
-import { useSession } from "next-auth/react";
-import FlightListSearch from "./FlightListSearch";
 import FlightMapAllWrapper from "./FlightMapAllWrapper";
+import FlightModal from "./modal/FlightModal";
+import FlightListSearch from "./FlightListSearch";
 import type { Flight } from "@/db/schema";
-import Button from "./ui/button";
-import AccountModal from "./modal/AccountModal";
+import { LuGitBranchPlus, LuLayoutList, LuMap, LuSettings } from "react-icons/lu";
 
 export default function HomeHeader({ flights }: { flights: Flight[] }) {
   const [modalOpen, setModalOpen] = useState(false);
-  const [accountOpen, setAccountOpen] = useState(false);
-  const { data: session } = useSession();
+  const [view, setView] = useState<"map" | "list">("map");
 
   return (
     <>
-      <div className="flex items-center justify-between px-body py-6">
-        <div>
-          <h1 className="text-2xl font-bold">I miei voli</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{flights.length} voli totali</p>
+      <div className="flex h-screen bg-background text-white overflow-hidden relative">
+        {/* Mappa */}
+        <div className={`absolute inset-0 transition-opacity duration-300 ${view === "map" ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
+          <FlightMapAllWrapper flights={flights} />
         </div>
-        <div className="flex items-center gap-2">
-          <Button onClick={() => setModalOpen(true)} className="rounded-xl">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14" />
-              <path d="M12 5v14" />
-            </svg>
-            Nuovo volo
-          </Button>
+
+        {/* Lista fullscreen */}
+        <div className={`absolute inset-0 overflow-y-auto bg-background transition-opacity duration-300 ${view === "list" ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
+          <div className="max-w-3xl mx-auto px-6 py-24">
+            <FlightListSearch flights={flights} />
+          </div>
+        </div>
+
+        {/* Dock bottom */}
+        <div className="absolute z-10 bottom-4 left-0 right-0 mx-auto bg-black/60 w-fit flex flex-row gap-4 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3">
+          <div className="w-6 h-6 icons cursor-pointer" onClick={() => setModalOpen(true)}>
+            <LuGitBranchPlus />
+          </div>
+          <div className="w-6 h-6 icons cursor-pointer" onClick={() => setView((v) => (v === "map" ? "list" : "map"))}>
+            {view === "map" ? <LuLayoutList /> : <LuMap />}
+          </div>
+          <div className="w-6 h-6 icons cursor-pointer">
+            <LuSettings />
+          </div>
         </div>
       </div>
 
-      <div className="flex h-[80vh] bg-background text-white overflow-hidden">
-        <div className="w-2/4 shrink-0 flex flex-col h-full border-r border-zinc-800">
-          <div className="flex-1 overflow-y-auto px-6 py-4">
-            <FlightListSearch flights={flights} externalModalOpen={modalOpen} onExternalModalClose={() => setModalOpen(false)} />
-          </div>
-        </div>
-        <div className="w-2/4 flex-1 h-full px-6 py-4">
-          <div className="rounded-3xl overflow-hidden w-full h-full border border-zinc-800">
-            <FlightMapAllWrapper flights={flights} />
-          </div>
-        </div>
-      </div>
-
-      <AccountModal open={accountOpen} onClose={() => setAccountOpen(false)} user={session?.user ?? {}} />
+      <FlightModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </>
   );
 }
