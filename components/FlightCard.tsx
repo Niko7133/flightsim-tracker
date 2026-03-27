@@ -6,7 +6,7 @@ import { markAsDone, deleteFlight } from "@/lib/actions";
 import type { Flight } from "@/db/schema";
 import FlightModal from "./modal/FlightModal";
 import ConfirmDialog from "./ui/ConfirmDialog";
-import { LuPencil, LuX, LuPlaneTakeoff, LuPlaneLanding, LuCheck } from "react-icons/lu";
+import { LuPencil, LuX, LuPlaneTakeoff, LuPlaneLanding, LuCheck, LuAntenna } from "react-icons/lu";
 
 function haversineNm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 3440.065;
@@ -223,6 +223,11 @@ export default function FlightCard({
             >
               <LuPencil className="w-3.5 h-3.5" />
             </button>
+            {flight.flightradarUrl && (
+              <a href={flight.flightradarUrl} className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent transition-colors cursor-pointer">
+                <LuAntenna className="w-3.5 h-3.5" />
+              </a>
+            )}
             <button
               onClick={(e) => {
                 e.stopPropagation();
